@@ -1,4 +1,4 @@
-= 桁架力学计算器 Tiny Trauss Solver (TTS)
+= 桁架力学计算器 Tiny Truss Solver (TTS)
 
 交大金课《问题求解与实践》大作业
 

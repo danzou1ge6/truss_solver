@@ -9,3 +9,7 @@ edition = "2021"
 fltk = "1.4.18"
 num-traits = "0.2.17"
 tabled = "0.14.0"
+
+[profiles.release]
+lto = true
+
