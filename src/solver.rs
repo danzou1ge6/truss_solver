@@ -256,6 +256,24 @@ impl Truss {
         }
         Err(())
     }
+    pub fn merge_nodes(&mut self, i: NodeId, j: NodeId) -> Result<(), ()> {
+        if i == j {
+            return Err(());
+        }
+
+        for (j_neighbour, rod) in self.graph[&j]
+            .iter()
+            .map(|(x, rod)| (*x, rod.clone()))
+            .collect::<Vec<_>>()
+            .into_iter()
+        {
+            let _ = self.add_rod(i, j_neighbour, rod);
+        }
+
+        self.remove_node(j).unwrap();
+
+        Ok(())
+    }
 }
 
 /// Querying truss nodes and rods by position
@@ -264,6 +282,14 @@ impl Truss {
     pub fn node_by_pos(&self, pos: &Vec2D, r: f64) -> Option<NodeId> {
         self.nodes
             .iter()
+            .find(|(_, node)| node.pos.distance(pos) <= r)
+            .map(|(id, _)| *id)
+    }
+    /// Returns the first node whose distance to `pos` is <= `r`
+    pub fn node_by_pos_but_not(&self, pos: &Vec2D, r: f64, i: NodeId) -> Option<NodeId> {
+        self.nodes
+            .iter()
+            .filter(|(x, _)| **x != i)
             .find(|(_, node)| node.pos.distance(pos) <= r)
             .map(|(id, _)| *id)
     }

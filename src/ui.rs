@@ -668,7 +668,21 @@ impl CanvasState {
                     self.select();
                 }
             }
-            Stage::DraggingNode(..) | Stage::Moving => {
+            Stage::Moving => {
+                self.gstate.borrow_mut().stage_to(Stage::Idle);
+            }
+            Stage::DraggingNode(i) => {
+                let mouse = self.round_pos(self.mouse_canvas_pos());
+                let option_j = self.gstate.borrow().truss.node_by_pos_but_not(
+                    &mouse,
+                    self.selection_radius(),
+                    i,
+                );
+                if let Some(j) = option_j {
+                    self.gstate.borrow_mut().truss.merge_nodes(i, j).unwrap();
+                    self.gstate.borrow_mut().mark_truss_changed();
+                }
+
                 self.gstate.borrow_mut().stage_to(Stage::Idle);
             }
         }
@@ -879,12 +893,12 @@ impl NodePropertyEditor {
                         let mut gstate_borrow = gstate.borrow_mut();
                         let node = gstate_borrow.truss.nodes.get_mut(&i).unwrap();
                         match &this.value().unwrap().label()[..] {
-                            "none" => node.constrain = Constrain::None,
-                            "hinge" => node.constrain = Constrain::Hinge,
-                            "slide" => {
+                            "None" => node.constrain = Constrain::None,
+                            "Hinge" => node.constrain = Constrain::Hinge,
+                            "Slide" => {
                                 node.constrain = Constrain::Slide(std::f64::consts::PI / 2.0)
                             }
-                            "force" => {
+                            "Force" => {
                                 node.constrain = Constrain::Force {
                                     f: 1.0,
                                     phi: -std::f64::consts::PI / 2.0,
@@ -899,7 +913,7 @@ impl NodePropertyEditor {
             }
         });
 
-        let none_group = fg::Group::default().with_size(w, 4 * 40).with_label("none");
+        let none_group = fg::Group::default().with_size(w, 4 * 40).with_label("None");
         ff::Frame::default()
             .with_size(100, 30)
             .below_of(&y_inp, 10)
@@ -908,7 +922,7 @@ impl NodePropertyEditor {
 
         let hinge_group = fg::Group::default()
             .with_size(w, 4 * 40)
-            .with_label("hinge");
+            .with_label("Hinge");
         ff::Frame::default()
             .with_size(100, 30)
             .below_of(&y_inp, 10)
@@ -917,7 +931,7 @@ impl NodePropertyEditor {
 
         let slide_group = fg::Group::default()
             .with_size(w, 4 * 40)
-            .with_label("slide");
+            .with_label("Slide");
         let mut slide_phi = fv::HorNiceSlider::default()
             .with_size(w, 40)
             .below_of(&y_inp, 10)
@@ -951,7 +965,7 @@ impl NodePropertyEditor {
 
         let force_group = fg::Group::default()
             .with_size(w, 4 * 40)
-            .with_label("force");
+            .with_label("Force");
 
         let force_label = ff::Frame::default()
             .with_size(w / 2, 30)
@@ -1226,16 +1240,27 @@ impl PropertyEditor {
             let mut node = node.clone();
 
             move |this| {
-
                 let stage = gstate.borrow().stage.clone();
                 match stage {
                     Stage::SelectedRod(..) => {
-                        fd::draw_rect_fill(this.x(), this.y(), this.w(), this.h(), fe::Color::Light2);
+                        fd::draw_rect_fill(
+                            this.x(),
+                            this.y(),
+                            this.w(),
+                            this.h(),
+                            fe::Color::Light2,
+                        );
                         rod.inner.show();
                         this.draw_child(&mut rod.inner);
                     }
                     Stage::SelectedNode(..) => {
-                        fd::draw_rect_fill(this.x(), this.y(), this.w(), this.h(), fe::Color::Light2);
+                        fd::draw_rect_fill(
+                            this.x(),
+                            this.y(),
+                            this.w(),
+                            this.h(),
+                            fe::Color::Light2,
+                        );
                         node.inner.show();
                         this.draw_child(&mut node.inner);
                     }
