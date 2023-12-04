@@ -3,6 +3,7 @@ name: Rust
 on:
   push:
     branches: [ "master" ]
+  workflow_dispatch:
 
 jobs:
   build:
@@ -59,6 +60,13 @@ jobs:
             cp "./target/${{ matrix.target }}/release/truss_solver" ./${{ matrix.exe-name }}
           fi
           
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: windows-package
+          path: |
+            ./${{ matrix.exe-name }}
+            
       - name: Create Release
         if: ${{ github.event_name == 'push' }}
         uses: "marvinpinto/action-automatic-releases@latest"
