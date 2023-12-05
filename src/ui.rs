@@ -343,7 +343,7 @@ impl CanvasState {
         let state_borrow = self.gstate.borrow();
 
         for (i, edges) in state_borrow.truss.graph.iter() {
-            for (j, _) in edges.iter() {
+            for (j, _) in edges.iter().filter(|(j, _)| **j < *i) {
                 let (ui, vi) = self.node_screen_pos(i);
                 let (uj, vj) = self.node_screen_pos(j);
 
