@@ -16,12 +16,11 @@ jobs:
     steps:
       - name: Create release
         id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: "marvinpinto/action-automatic-releases@latest"
         with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
           tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
+          automatic_release_name: Release ${{ github.ref }}
           draft: false
           prerelease: false
     
@@ -88,7 +87,6 @@ jobs:
             ./${{ matrix.exe-name }}
             
       - name: Upload Release Assets
-        if: ${{ github.event_name == 'push' }}
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
