@@ -46,7 +46,7 @@ jobs:
             rust: nightly-x86_64-msvc
             target: x86_64-pc-windows-msvc
             exe-name: truss_solver-x86_64-pc-windows-msvc.exe
-      fail-fast: false 
+      fail-fast: false
 
     steps:
       - name: Checkout repository
