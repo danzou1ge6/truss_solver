@@ -12,7 +12,7 @@ jobs:
     name: Create Release
     runs-on: ubuntu-latest
     outputs:
-      upload_url: ${{ steps.create_release.outputs.upload_url }}
+      upload_url: ${{ steps.create_release.outputs.upload_url }} 
     steps:
       - name: Create release
         id: create_release
@@ -34,7 +34,7 @@ jobs:
           - build: linux
             os: ubuntu-latest
             rust: nightly
-            target: x86_64-unknown-linux-musl
+            target: x86_64-unknown-linux-musl 
             exe-name: truss_solver-x86_64-unknown-linux-musl
           - build: macos
             os: macos-latest
@@ -46,7 +46,7 @@ jobs:
             rust: nightly-x86_64-msvc
             target: x86_64-pc-windows-msvc
             exe-name: truss_solver-x86_64-pc-windows-msvc.exe
-      fail-fast: false
+      fail-fast: false 
 
     steps:
       - name: Checkout repository
@@ -70,6 +70,8 @@ jobs:
         run: cargo build --release --target ${{ matrix.target }}
         env:
           RUST_BACKTRACE: 1
+          CC: gcc
+          CXX: g++
 
       - name: Strip binary (linux and macos)
         if: matrix.build == 'linux' || matrix.build == 'macos'
@@ -89,7 +91,7 @@ jobs:
         with:
           name: windows-package
           path: |
-            ./${{ matrix.exe-name }}
+            ./${{ matrix.exe-name }} 
             
       - name: Upload Release Assets
         uses: actions/upload-release-asset@v1
