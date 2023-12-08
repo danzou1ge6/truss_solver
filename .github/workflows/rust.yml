@@ -20,7 +20,7 @@ jobs:
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           tag_name: ${{ github.ref }}
-          automatic_release_name: Release ${{ github.ref }}
+          automatic_release_tag: ${{ github.ref }}
           draft: false
           prerelease: false
     
