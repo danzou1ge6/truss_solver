@@ -338,6 +338,16 @@ impl Truss {
         let ni = self.graph.get_mut(&i)?;
         ni.get_mut(&j)
     }
+    pub fn neighbour_distances<'a>(&'a self, i: NodeId) -> Option<impl Iterator<Item = f64> + 'a> {
+        let neighbours = self.graph.get(&i)?;
+
+        Some(
+            neighbours
+                .keys()
+                .copied()
+                .map(move |j| self.nodes[&i].pos.distance(&self.nodes[&j].pos)),
+        )
+    }
     /// Calculate some characteristic of [`Rod`] `i, j`.
     pub fn rod_info(&self, i: NodeId, j: NodeId) -> Option<RodInfo> {
         let length = self.nodes[&i].pos.distance(&self.nodes[&j].pos);

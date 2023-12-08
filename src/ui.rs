@@ -33,6 +33,7 @@ enum Message {
     IdleHint,
     DrawHint,
     SolveSuccess,
+    UnacceptableBigDu,
 }
 
 impl std::fmt::Display for Message {
@@ -46,6 +47,9 @@ impl std::fmt::Display for Message {
             IdleHint => f.write_str("Left click to edit, right click to draw"),
             DrawHint => f.write_str("Left click to exit draw, right click to draw rod"),
             SolveSuccess => f.write_str("Successfully solved"),
+            UnacceptableBigDu => {
+                f.write_str("DU is unacceptably large on some nodes, structure may be unstable")
+            }
         }
     }
 }
@@ -119,8 +123,29 @@ impl State {
         match self.truss.solve() {
             Ok(du) => {
                 self.forces = Some(self.truss.rods_force(&du));
+                if self
+                    .truss
+                    .nodes
+                    .keys()
+                    .copied()
+                    .map(|i| {
+                        du.get(i).unwrap().length()
+                            > self
+                                .truss
+                                .neighbour_distances(i)
+                                .unwrap()
+                                .reduce(|a, b| a.min(b))
+                                .unwrap_or(f64::MAX)
+                                / 100.0
+                    })
+                    .any(|x| x)
+                {
+                    self.set_msg(Message::UnacceptableBigDu);
+                } else {
+                    self.set_msg(Message::SolveSuccess);
+                }
+
                 self.du = Some(du);
-                self.set_msg(Message::SolveSuccess);
             }
             Err(e) => {
                 self.set_msg(Message::TrussSolve(e));
@@ -207,6 +232,8 @@ struct CanvasState {
 fn smart_format_float(x: f64) -> String {
     if 0.1 <= x.abs() && x.abs() < 100.0 {
         format!("{:.2}", x)
+    } else if x.abs() < 1e-5 {
+        format!("0")
     } else {
         format!("{:.2e}", x)
     }
@@ -282,7 +309,7 @@ impl CanvasState {
         self.draw_line_canvas(begin, end);
     }
 
-    fn draw_node_du(&self, at: Vec2D, value: Vec2D) {
+    fn draw_node_du(&self, at: Vec2D, value: Vec2D, node: NodeId) {
         let n = value.normalized();
         let end = at + Self::NODE_CANVAS_RADIUS * 8.0 * n;
         let begin = at + Self::NODE_CANVAS_RADIUS * n;
@@ -302,7 +329,21 @@ impl CanvasState {
             fd::draw_text(&&smart_format_float(value.length()), u, v);
         }
 
-        fd::set_draw_color(fe::Color::Dark2);
+        if value.length()
+            > self
+                .gstate
+                .borrow()
+                .truss
+                .neighbour_distances(node)
+                .unwrap()
+                .reduce(|a, b| a.min(b))
+                .unwrap_or(f64::MAX)
+                / 100.0
+        {
+            fd::set_draw_color(fe::Color::Red);
+        } else {
+            fd::set_draw_color(fe::Color::Dark2);
+        }
         fd::set_line_style(fd::LineStyle::Dash, 2);
         self.draw_line_canvas(cw_begin, end);
         self.draw_line_canvas(ccw_begin, end);
@@ -435,7 +476,7 @@ impl CanvasState {
         if let Some(du) = &self.gstate.borrow().du {
             for (id, node) in self.gstate.borrow().truss.nodes.iter() {
                 if let Some(displacement) = du.get(*id) {
-                    self.draw_node_du(node.pos, displacement);
+                    self.draw_node_du(node.pos, displacement, *id);
                 }
             }
         }

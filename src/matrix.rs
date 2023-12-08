@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 pub enum Solution<T> {
     Many,
     None,
@@ -14,14 +16,21 @@ pub mod traits {
         fn rows(&self) -> usize;
         fn cols(&self) -> usize;
         fn get(&self, i: usize, j: usize) -> Option<&T>;
-        fn clone_data(&self) -> Matrix<T> where T: Clone {
+        fn clone_data(&self) -> Matrix<T>
+        where
+            T: Clone,
+        {
             let mut data = Vec::with_capacity(self.rows() * self.cols());
             for i in 0..self.rows() {
                 for j in 0..self.cols() {
                     data.push(self[(i, j)].clone());
                 }
             }
-            Matrix { data, cols: self.cols(), rows: self.rows() }
+            Matrix {
+                data,
+                cols: self.cols(),
+                rows: self.rows(),
+            }
         }
     }
 
