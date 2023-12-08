@@ -61,7 +61,7 @@ jobs:
           target: ${{ matrix.target }}
 
       - name: Install FLTK Dependencies
-        if: matrix.build == "linux"
+        if: matrix.build == 'linux'
         run: |
           apt-get install g++ cmake git make
           apt-get install libx11-dev libxext-dev libxft-dev libxinerama-dev libxcursor-dev libxrender-dev libxfixes-dev libpango1.0-dev libgl1-mesa-dev libglu1-mesa-dev
