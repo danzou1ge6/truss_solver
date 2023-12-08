@@ -63,8 +63,8 @@ jobs:
       - name: Install FLTK Dependencies
         if: matrix.build == 'linux'
         run: |
-          apt-get install g++ cmake git make
-          apt-get install libx11-dev libxext-dev libxft-dev libxinerama-dev libxcursor-dev libxrender-dev libxfixes-dev libpango1.0-dev libgl1-mesa-dev libglu1-mesa-dev
+          sudo apt-get install g++ cmake git make
+          sudo apt-get install libx11-dev libxext-dev libxft-dev libxinerama-dev libxcursor-dev libxrender-dev libxfixes-dev libpango1.0-dev libgl1-mesa-dev libglu1-mesa-dev
 
       - name: Build binary
         run: cargo build --release --target ${{ matrix.target }}
